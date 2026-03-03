@@ -4,8 +4,8 @@
       "key": "ocj_intel_01",
       "used": true,
       "usedBy": "情报龙虾",
-      "usedByAgentId": "agent_1772528624106_z4h3",
-      "usedAt": "2026-03-03T17:03:44.107132",
+      "usedByAgentId": "agent_1772532592000_o33j",
+      "usedAt": "2026-03-03T18:09:52.000629",
       "reusable": true,
       "maxConcurrent": 3
     },
@@ -13,8 +13,8 @@
       "key": "ocj_market_01",
       "used": true,
       "usedBy": "市场龙虾",
-      "usedByAgentId": "agent_1772531990115_ugo3",
-      "usedAt": "2026-03-03T17:59:50.115653",
+      "usedByAgentId": "agent_1772532592010_0ig5",
+      "usedAt": "2026-03-03T18:09:52.011013",
       "reusable": true,
       "maxConcurrent": 3
     }
