@@ -8,6 +8,15 @@
       "usedAt": "2026-03-03T17:03:44.107132",
       "reusable": true,
       "maxConcurrent": 3
+    },
+    {
+      "key": "ocj_market_01",
+      "used": true,
+      "usedBy": "市场龙虾",
+      "usedByAgentId": "agent_1772531990115_ugo3",
+      "usedAt": "2026-03-03T17:59:50.115653",
+      "reusable": true,
+      "maxConcurrent": 3
     }
   ]
 }
