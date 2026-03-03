@@ -160,8 +160,37 @@ def extract_memo_from_file(file_path):
         print(f"提取 memo 失败: {e}")
         return "「昨日记录加载失败」\n\n「往者不可谏，来者犹可追。」"
 
+# Optional simple auth (shared secret) for public deployments.
+# If STAR_OFFICE_API_KEY is set, all endpoints require either:
+# - query param ?token=... (recommended; no CORS preflight), or
+# - header X-API-Key: ...
+STAR_OFFICE_API_KEY = os.getenv("STAR_OFFICE_API_KEY", "").strip()
+
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="/static")
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.getenv("STAR_OFFICE_SECRET") or "star-office-dev-secret-change-me"
+
+
+@app.before_request
+def require_api_key():
+    """Very simple shared-secret auth to keep scanners out.
+
+    Designed to work with GitHub Pages frontend (cross-origin): use ?token=...
+    to avoid triggering CORS preflight.
+    """
+    if not STAR_OFFICE_API_KEY:
+        return None
+
+    # Allow CORS preflight through.
+    if request.method == "OPTIONS":
+        return None
+
+    token = (request.args.get("token") or "").strip()
+    header = (request.headers.get("X-API-Key") or "").strip()
+
+    if token == STAR_OFFICE_API_KEY or header == STAR_OFFICE_API_KEY:
+        return None
+
+    return jsonify({"ok": False, "msg": "unauthorized"}), 401
 
 # Guard join-agent critical section to enforce per-key concurrency under parallel requests
 join_lock = threading.Lock()

@@ -1,3 +1,22 @@
 {
-  "keys": []
+  "keys": [
+    {
+      "key": "ocj_intel_01",
+      "used": false,
+      "usedBy": null,
+      "usedByAgentId": null,
+      "usedAt": null,
+      "reusable": true,
+      "maxConcurrent": 3
+    },
+    {
+      "key": "ocj_market_01",
+      "used": false,
+      "usedBy": null,
+      "usedByAgentId": null,
+      "usedAt": null,
+      "reusable": true,
+      "maxConcurrent": 3
+    }
+  ]
 }
