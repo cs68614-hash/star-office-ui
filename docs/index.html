@@ -438,9 +438,23 @@
         移动视野
     </button>
 
-    <script src="./config.js"></script>
+    <script src="./config.js?v=20260303_1749"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
     <script>
+        // --- Auth token forwarding (GitHub Pages -> API) ---
+        // Some browsers/cache/CDNs may keep an old config.js. Ensure token is always appended.
+        const __PAGE_TOKEN__ = new URLSearchParams(window.location.search).get('token') || '';
+        function __withToken__(urlStr) {
+            if (!__PAGE_TOKEN__) return urlStr;
+            const u = new URL(urlStr, window.location.origin);
+            if (!u.searchParams.get('token')) u.searchParams.set('token', __PAGE_TOKEN__);
+            return u.toString();
+        }
+        const __rawApiUrl__ = window.__STAR_OFFICE_API_URL__ || function (p) { return p; };
+        window.__STAR_OFFICE_API_URL__ = function (path) {
+            return __withToken__(__rawApiUrl__(path));
+        };
+
         // 检测浏览器是否支持 WebP
         let supportsWebP = false;
         
