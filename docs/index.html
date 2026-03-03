@@ -504,7 +504,7 @@
             const memoContent = document.getElementById('memo-content');
             
             try {
-                const response = await fetch(__STAR_OFFICE_API_URL__('/yesterday-memo?t=') + Date.now(), { cache: 'no-store' });
+                const response = await fetch(__STAR_OFFICE_API_URL__('/yesterday-memo?t=' + Date.now()), { cache: 'no-store' });
                 const data = await response.json();
                 
                 if (data.success && data.memo) {
@@ -1171,7 +1171,7 @@
             // demo 随机状态先更新（不依赖后端）
             maybeRandomizeDemoVisitors();
 
-            return fetch(__STAR_OFFICE_API_URL__('/agents?t=') + Date.now(), { cache: 'no-store' })
+            return fetch(__STAR_OFFICE_API_URL__('/agents?t=' + Date.now()), { cache: 'no-store' })
                 .then(response => response.json())
                 .then(data => {
                     // 无论后端返回是否为数组，demo=1 都应保证本地 demo 访客可见
