@@ -142,10 +142,25 @@ VERSION_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 @app.after_request
 def add_no_cache_headers(response):
-    """Aggressively prevent caching for all responses"""
+    """Aggressively prevent caching and allow CORS for GitHub Pages."""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+
+    # CORS: allow the GitHub Pages frontend to call this API.
+    origin = request.headers.get("Origin", "")
+    allowlist = {
+        "https://cs68614-hash.github.io",  # GitHub Pages root
+        "https://cs68614-hash.github.io/star-office-ui",  # sometimes sent without trailing slash
+        "https://cs68614-hash.github.io/star-office-ui/",
+    }
+    if origin in allowlist:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+
     return response
 
 # Default state
