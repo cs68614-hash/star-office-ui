@@ -497,13 +497,32 @@
         let loadedAssets = 0;
         let loadingProgressBar, loadingProgressContainer, loadingOverlay, loadingText;
 
+        // --- API base + token auth (for GitHub Pages frontend) ---
+        // If hosted on GitHub Pages, API lives on a different origin.
+        // We also support simple token auth via ?token=... for the backend.
+        const PAGE_TOKEN = new URLSearchParams(window.location.search).get('token') || '';
+        const API_BASE = window.location.hostname.endsWith('github.io')
+            ? 'https://api.techsong.dpdns.org'
+            : '';
+
+        function apiUrl(pathWithQuery) {
+            // pathWithQuery: "/health" or "/agents?t=123" etc.
+            const url = new URL(API_BASE + pathWithQuery, window.location.origin);
+            if (PAGE_TOKEN) url.searchParams.set('token', PAGE_TOKEN);
+            return url.toString();
+        }
+
+        function apiFetch(pathWithQuery, options) {
+            return fetch(apiUrl(pathWithQuery), options);
+        }
+
         // Memo 相关函数
         async function loadMemo() {
             const memoDate = document.getElementById('memo-date');
             const memoContent = document.getElementById('memo-content');
             
             try {
-                const response = await fetch('/yesterday-memo?t=' + Date.now(), { cache: 'no-store' });
+                const response = await apiFetch('/yesterday-memo?t=' + Date.now(), { cache: 'no-store' });
                 const data = await response.json();
                 
                 if (data.success && data.memo) {
@@ -669,7 +688,7 @@
 
         // 状态控制栏函数（用于测试）
         function setState(state, detail) {
-            fetch('/set_state', {
+            apiFetch('/set_state', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ state, detail })
@@ -691,7 +710,7 @@
         }
 
         function leaveGuestAgent(agentId, name) {
-            fetch('/leave-agent', {
+            apiFetch('/leave-agent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ agentId, name })
@@ -726,7 +745,7 @@
         }
 
         function approveGuestAgent(agentId) {
-            fetch('/agent-approve', {
+            apiFetch('/agent-approve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ agentId })
@@ -743,7 +762,7 @@
         }
 
         function rejectGuestAgent(agentId) {
-            fetch('/agent-reject', {
+            apiFetch('/agent-reject', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ agentId })
@@ -1170,7 +1189,7 @@
             // demo 随机状态先更新（不依赖后端）
             maybeRandomizeDemoVisitors();
 
-            return fetch('/agents?t=' + Date.now(), { cache: 'no-store' })
+            return apiFetch('/agents?t=' + Date.now(), { cache: 'no-store' })
                 .then(response => response.json())
                 .then(data => {
                     // 无论后端返回是否为数组，demo=1 都应保证本地 demo 访客可见
@@ -1858,7 +1877,7 @@
         }
 
         function fetchStatus() {
-            fetch('/status')
+            apiFetch('/status')
                 .then(response => response.json())
                 .then(data => {
                     const nextState = normalizeState(data.state);
