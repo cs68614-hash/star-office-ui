@@ -183,7 +183,8 @@ def _require_asset_editor_auth():
 
 @app.after_request
 def add_no_cache_headers(response):
-    """Apply cache policy by path:
+    """Apply cache policy by path + CORS for GitHub Pages.
+
     - HTML/API/state: no-cache (always fresh)
     - /static assets: long cache (filenames are versioned with ?v=VERSION_TIMESTAMP)
     """
@@ -196,6 +197,21 @@ def add_no_cache_headers(response):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+
+    # CORS: allow the GitHub Pages frontend to call this API.
+    origin = request.headers.get("Origin", "")
+    allowlist = {
+        "https://cs68614-hash.github.io",
+        "https://cs68614-hash.github.io/star-office-ui",
+        "https://cs68614-hash.github.io/star-office-ui/",
+    }
+    if origin in allowlist:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+
     return response
 
 # Default state
