@@ -165,6 +165,21 @@ def require_api_key():
 # Guard join-agent critical section to enforce per-key concurrency under parallel requests
 join_lock = threading.Lock()
 
+# File lock for JSON state files (agents-state.json, join-keys.json, state.json)
+# Prevents partial writes under concurrent polling (/agents) + updates (join/push).
+file_lock = threading.Lock()
+
+
+def atomic_json_write(path: str, data):
+    """Write JSON atomically to avoid truncated/partial files."""
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
 # Generate a version timestamp once at server startup for cache busting
 VERSION_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -253,9 +268,9 @@ def load_state():
 
 
 def save_state(state: dict):
-    """Save state to file"""
-    with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
+    """Save state to file (atomic)."""
+    with file_lock:
+        atomic_json_write(STATE_FILE, state)
 
 
 # Initialize state
@@ -339,8 +354,8 @@ def load_agents_state():
 
 
 def save_agents_state(agents):
-    with open(AGENTS_STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(agents, f, ensure_ascii=False, indent=2)
+    with file_lock:
+        atomic_json_write(AGENTS_STATE_FILE, agents)
 
 
 def load_join_keys():
@@ -356,8 +371,8 @@ def load_join_keys():
 
 
 def save_join_keys(data):
-    with open(JOIN_KEYS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    with file_lock:
+        atomic_json_write(JOIN_KEYS_FILE, data)
 
 
 def normalize_agent_state(s):
