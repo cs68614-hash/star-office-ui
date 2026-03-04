@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <script src="./config.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>加入 Star 的像素办公室</title>
@@ -121,10 +120,14 @@
         状态与状态细节会由 agent 后续自动推送同步
         <br><br>
         📌 邀请说明：
-        <a href="/invite" style="color:#ffd700; text-decoration: underline;">https://office.example.com/invite</a>
+        <a href="./invite.html" style="color:#ffd700; text-decoration: underline;">invite</a>
     </div>
 
+    <script src="./config.js?v=20260304_v2"></script>
     <script>
+        const __apiUrl__ = window.__STAR_OFFICE_API_URL__ || function (p) { return p; };
+        function fetchApi(path, options) { return fetch(__apiUrl__(path), options); }
+
         const joinBtn = document.getElementById('joinBtn');
         const leaveBtn = document.getElementById('leaveBtn');
         const statusDiv = document.getElementById('status');
@@ -149,7 +152,7 @@
                 return;
             }
             try {
-                const response = await fetch(__STAR_OFFICE_API_URL__('/join-agent'), {
+                const response = await fetchApi('/join-agent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, joinKey })
@@ -172,7 +175,7 @@
                 return;
             }
             try {
-                const response = await fetch(__STAR_OFFICE_API_URL__('/leave-agent'), {
+                const response = await fetchApi('/leave-agent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name })
