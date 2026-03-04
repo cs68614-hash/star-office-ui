@@ -216,7 +216,20 @@ ASSET_DRAWER_PASS_DEFAULT = os.getenv("ASSET_DRAWER_PASS", "1234")
 
 
 def _is_asset_editor_authed() -> bool:
-    return bool(session.get("asset_editor_authed"))
+    # 1) Cookie-based auth (works when frontend is same-origin)
+    if session.get("asset_editor_authed"):
+        return True
+
+    # 2) Token-based auth (works for GitHub Pages cross-origin)
+    # If API auth is enabled and the request is already authorized via token/header,
+    # allow asset editor endpoints without requiring a cookie session.
+    if STAR_OFFICE_API_KEY:
+        token = (request.args.get("token") or "").strip()
+        header = (request.headers.get("X-API-Key") or "").strip()
+        if token == STAR_OFFICE_API_KEY or header == STAR_OFFICE_API_KEY:
+            return True
+
+    return False
 
 
 def _require_asset_editor_auth():
